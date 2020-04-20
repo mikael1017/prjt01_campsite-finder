@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+    <title>Document</title>
+</head>
+
+<body>
+    <nav class="navbar is-dark block is-flex">
+        <a class="navbar-brand" style="margin-left: auto;margin-right: auto;display: block" href="HOME">
+            <img src="./logo2.png" width="200">
+        </a>
+    </nav>
+
+
+    <div class="container">
+        <div class="columns is-marginless" style="text-align: center;">
+
+            <div class="column">
+                <input class="input is-rounded is-normal" type="text" placeholder="Check-In" id="from" name="from">
+            </div>
+
+            <div class="column">
+                <input class="input is-rounded is-normal" type="text" placeholder="Check-Out" id="to" name="to">
+            </div>
+
+            <div class="column">
+                <input class="input is-rounded is-normal" type="text" placeholder="Name of City">
+            </div>
+
+            <div class="select is-rounded is-normal column is-multiple">
+                <select id="stateOptions">
+                </select>
+            </div>
+
+            <div class="column">
+                <button class="button is-rounded is-dark is-normal">Search</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- <div class="container is-flex-mobile">
+
+        <div class="columns is-marginless">
+
+            <div class="column">
+                <label class="checkbox level-left">
+                    <input type="checkbox" id="pet-allowed">
+                    Pet Allowed
+                </label>
+
+                <label class="checkbox level-left">
+                    <input type="checkbox" id="running-water">
+                    Running Water
+                </label>
+            </div>
+
+            <div class="column">
+                <label class="checkbox level-left">
+                    <input type="checkbox" id="electrictiry">
+                    Electrictiry
+                </label>
+
+                <label class="checkbox level-left">
+                    <input type="checkbox" id="shelters">
+                    Shelters
+                </label>
+            </div>
+
+            <div class="column">
+                <label class="checkbox level-left">
+                    <input type="checkbox" id="rv-parking">
+                    RV Parking
+                </label>
+
+                <label class="checkbox level-left">
+                    <input type="checkbox" id="general-store">
+                    General Store
+                </label>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="container block">
+        <hr>
+        <article class="message">
+            <div class="message-header">
+                <a href="res.RECDATA[i].RECAREA[0].ResourceLink">res.RECDATA[i].RECAREA[0].RecAreaName</a>
+                <button class="delete" aria-label="delete"></button>
+            </div>
+            <div class="message-body columns has-text-lefted">
+                <div class="column is-8">
+                Address : res.RECDATA[i].RECAREA[0].RecAreaName<br>
+                Direction : res.RECDATA[i] <br>
+                Email : res.RECDATA[i] <br>
+                Phone Number : res.RECDATA[i] <br>
+                Organization Name : res.RECDATA[i] <br>
+                Organization Website : res.RECDATA[i] <br>
+                Weather Forecast : with icons<br>
+                Description : res.RECDATA[i] <br>
+
+            </div>
+            <div class="column is-4">
+                Google Map
+            </div>
+
+        </article>
+
+    </div>
+
+
+
+
+
+
+    <footer class="footer has-background-dark">
+        <div class="has-text-centered">
+            Copyright 2020 @ CAMPSITE FINDER Foundation. All right reserved.
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            var dateFormat = "mm/dd/yy",
+                from = $("#from")
+                    .datepicker({
+                        defaultDate: "+1w",
+                        changeMonth: true,
+                        numberOfMonths: 1
+                    })
+                    .on("change", function () {
+                        to.datepicker("option", "minDate", getDate(this));
+                    }),
+                to = $("#to").datepicker({
+                    defaultDate: "+1w",
+                    changeMonth: true,
+                    numberOfMonths: 1
+                })
+                    .on("change", function () {
+                        from.datepicker("option", "maxDate", getDate(this));
+                    });
+
+            function getDate(element) {
+                var date;
+                try {
+                    date = $.datepicker.parseDate(dateFormat, element.value);
+                } catch (error) {
+                    date = null;
+                }
+
+                return date;
+            }
+        });
+    </script>
+
+
+
+
+    <script type="text/javascript">
+
+
+        var states = ["AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY"];
+        for (var i = 0; i < states.length; i++) {
+            $("<option>").text(states[i])
+                .attr("value", states[i])
+                .appendTo($("#stateOptions"));
+        }
+
+
+
+
+        var cityInput = "overland Park";
+        var apiKey = "443955fb6787f379caecf22f8c6f2f2e";
+        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityInput + "&units=imperial&appid=" + apiKey;
+
+        $.ajax({
+
+            url: queryURL,
+            method: 'GET'
+
+        }).then(function (res) {
+
+            var lon = res.coord.lon;
+            var lat = res.coord.lat;
+
+
+            jQuery.ajaxPrefilter(function (options) {
+                if (options.crossDomain && jQuery.support.cors) {
+                    options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+                }
+            });
+
+            $.ajax({
+                url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=60&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
+                method: "GET",
+                crossDomain: true
+
+            }).then(function (res) {
+                console.log(res);
+
+                for (var i = 1; i < res.RECDATA.length; i++) {
+                    console.log(res.RECDATA[i].FACILITYADDRESS[0].City);
+                }
+
+            });
+
+        });
+
+    </script>
+</body>
+
+</html>
