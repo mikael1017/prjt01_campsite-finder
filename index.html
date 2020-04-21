@@ -54,7 +54,7 @@
         <hr>
         <div id="articles">
 
-            <article class="message">
+            <!-- <article class="message" id="article">
                 <div class="message-header">
                     <a href="res.RECDATA[i].RECAREA[0].ResourceLink">res.RECDATA[i].RECAREA[0].RecAreaName</a>
                     <button class="delete" aria-label="delete"></button>
@@ -77,7 +77,7 @@
                         Google Map
                     </div>
                 </div>
-            </article>
+            </article> -->
 
         </div>
     </div>
@@ -150,7 +150,7 @@
 
         function campsiteInfo() {
 
-            var cityInput = "Seattle";
+            var cityInput = "Kansas city";
             var apiKey = "443955fb6787f379caecf22f8c6f2f2e";
             var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityInput + "&units=imperial&appid=" + apiKey;
 
@@ -180,18 +180,19 @@
                 }).then(function (res1) {
                     console.log(res1);
 
-                    for (var i = 1; i < res1.RECDATA.length; i++) {
+                    for (var i = 0; i < res1.RECDATA.length; i++) {
                         
+                        $("<article>").addClass("message")
+                            .attr("id","article"+i)
+                            .appendTo($("#articles"));
                         
-
-
-
-
-
-
-
-
-
+                        $("<div>").addClass("message-header")
+                            .attr("id","siteName"+i)
+                            .appendTo($("#article"+i));
+                        
+                        $("<a>").text(res1.RECDATA[i].FacilityName)
+                            .attr("href",res1.RECDATA[i])
+                            .appendTo($("#siteName"+i));
 
 
                     }
