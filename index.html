@@ -52,29 +52,34 @@
 
     <div class="container block">
         <hr>
-        <article class="message">
-            <div class="message-header">
-                <a href="res.RECDATA[i].RECAREA[0].ResourceLink">res.RECDATA[i].RECAREA[0].RecAreaName</a>
-                <button class="delete" aria-label="delete"></button>
-            </div>
-            <div class="message-body columns has-text-lefted">
-                <div class="column is-8">
-                Address : res.RECDATA[i].RECAREA[0].RecAreaName<br>
-                Direction : res.RECDATA[i] <br>
-                Email : res.RECDATA[i] <br>
-                Phone Number : res.RECDATA[i] <br>
-                Organization Name : res.RECDATA[i] <br>
-                Organization Website : res.RECDATA[i] <br>
-                Weather Forecast : with icons<br>
-                Description : res.RECDATA[i] <br>
+        <div id="articles">
 
-            </div>
-            <div class="column is-4">
-                Google Map
-            </div>
+            <article class="message">
+                <div class="message-header">
+                    <a href="res.RECDATA[i].RECAREA[0].ResourceLink">res.RECDATA[i].RECAREA[0].RecAreaName</a>
+                    <button class="delete" aria-label="delete"></button>
+                </div>
 
-        </article>
+                <div class="message-body columns has-text-lefted">
+                    <div class="column is-8" id="info">
 
+                        Address : res.RECDATA[i].RECAREA[0].RecAreaName<br>
+                        Direction : res.RECDATA[i] <br>
+                        Email : res.RECDATA[i] <br>
+                        Phone Number : res.RECDATA[i] <br>
+                        Organization Name : res.RECDATA[i] <br>
+                        Organization Website : res.RECDATA[i] <br>
+                        Weather Forecast : with icons<br>
+                        Description : res.RECDATA[i] <br>
+
+                    </div>
+                    <div class="column is-4" id="map">
+                        Google Map
+                    </div>
+                </div>
+            </article>
+
+        </div>
     </div>
 
     <footer class="footer has-background-dark">
@@ -89,7 +94,7 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    
+
     <script>
         $(function () {
             var dateFormat = "mm/dd/yy",
@@ -135,43 +140,66 @@
                 .appendTo($("#stateOptions"));
         }
 
-        var cityInput = "Seattle";
-        var apiKey = "443955fb6787f379caecf22f8c6f2f2e";
-        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityInput + "&units=imperial&appid=" + apiKey;
 
-        $.ajax({
-
-            url: queryURL,
-            method: 'GET'
-
-        }).then(function (res0) {
-
-            var lon = res0.coord.lon;
-            var lat = res0.coord.lat;
-            console.log(res0);
+        campsiteInfo();
 
 
-            jQuery.ajaxPrefilter(function (options) {
-                if (options.crossDomain && jQuery.support.cors) {
-                    options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
-                }
-            });
+
+
+
+
+        function campsiteInfo() {
+
+            var cityInput = "Seattle";
+            var apiKey = "443955fb6787f379caecf22f8c6f2f2e";
+            var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityInput + "&units=imperial&appid=" + apiKey;
 
             $.ajax({
-                url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=60&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
-                method: "GET",
-                crossDomain: true
 
-            }).then(function (res1) {
-                console.log(res1);
+                url: queryURL,
+                method: 'GET'
 
-                for (var i = 1; i < res1.RECDATA.length; i++) {
-                    console.log(res1.RECDATA[i].FACILITYADDRESS[0].City);
-                }
+            }).then(function (res0) {
+
+                var lon = res0.coord.lon;
+                var lat = res0.coord.lat;
+                console.log(res0);
+
+
+                jQuery.ajaxPrefilter(function (options) {
+                    if (options.crossDomain && jQuery.support.cors) {
+                        options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+                    }
+                });
+
+                $.ajax({
+                    url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=10 0&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
+                    method: "GET",
+                    crossDomain: true
+
+                }).then(function (res1) {
+                    console.log(res1);
+
+                    for (var i = 1; i < res1.RECDATA.length; i++) {
+                        
+                        
+
+
+
+
+
+
+
+
+
+
+
+                    }
+
+                });
 
             });
-
-        });
+        }
 
     </script>
 </body>
