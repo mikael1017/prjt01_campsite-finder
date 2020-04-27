@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <link href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
@@ -32,7 +33,7 @@
             </div>
 
             <div class="column">
-                <input class="input is-rounded is-normal" type="text" placeholder="Name of City">
+                <input class="input is-rounded is-normal" id="cityname" type="text" placeholder="Name of City">
             </div>
 
             <div class="select is-rounded is-normal column is-multiple">
@@ -41,43 +42,24 @@
             </div>
 
             <div class="column">
-                <button class="button is-rounded is-dark is-normal">Search</button>
+                <button class="button is-rounded is-dark is-normal" id="search" type="submit">Search</button>
             </div>
-
             <div class="column">
-                <button class="button is-rounded is-dark is-normal">My Campsite</button>
+                <button class="button is-rounded is-dark is-normal" id="mycampsite">My Campsite</button>
             </div>
         </div>
+        <hr>
     </div>
 
     <div class="container block">
-        <hr>
         <div id="articles">
+            <blockquote class="box has-text-centered">
+                "A BAD DAY CAMPING IS STILL BETTER THAN A GOOD DAY WORKING."
+                <br>
+                <br> - CAMPSITE FINDER -
 
-            <!-- <article class="message" id="article">
-                <div class="message-header">
-                    <a href="res.RECDATA[i].RECAREA[0].ResourceLink">res.RECDATA[i].RECAREA[0].RecAreaName</a>
-                    <button class="delete" aria-label="delete"></button>
-                </div>
+            </blockquote>
 
-                <div class="message-body columns has-text-lefted">
-                    <div class="column is-8" id="info">
-
-                        Address : res.RECDATA[i].RECAREA[0].RecAreaName<br>
-                        Direction : res.RECDATA[i] <br>
-                        Email : res.RECDATA[i] <br>
-                        Phone Number : res.RECDATA[i] <br>
-                        Organization Name : res.RECDATA[i] <br>
-                        Organization Website : res.RECDATA[i] <br>
-                        Weather Forecast : with icons<br>
-                        Description : res.RECDATA[i] <br>
-
-                    </div>
-                    <div class="column is-4" id="map">
-                        Google Map
-                    </div>
-                </div>
-            </article> -->
 
         </div>
     </div>
@@ -129,8 +111,6 @@
         });
     </script>
 
-
-
     <script type="text/javascript">
 
         var states = ["AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY"];
@@ -140,66 +120,113 @@
                 .appendTo($("#stateOptions"));
         }
 
+        $(document).ready(function () {
 
-        campsiteInfo();
+            $("#search").click(function () {
+                $("#articles").empty();
+                var cityInput = $("#cityname").val();
+                var stateInput = $("#stateOptions").val();
 
+                if (cityInput) {
+                    console.log(cityInput);
+                    campsiteInfoByCity(cityInput);
+                } else {
+                    console.log(stateInput);
+                }
+            });
+        });
 
-
-
-
-
-        function campsiteInfo() {
-
-            var cityInput = "Kansas city";
+        function campsiteInfoByCity(cityInput) {
             var apiKey = "443955fb6787f379caecf22f8c6f2f2e";
             var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityInput + "&units=imperial&appid=" + apiKey;
-
             $.ajax({
-
                 url: queryURL,
                 method: 'GET'
-
             }).then(function (res0) {
-
                 var lon = res0.coord.lon;
                 var lat = res0.coord.lat;
-                console.log(res0);
-
 
                 jQuery.ajaxPrefilter(function (options) {
                     if (options.crossDomain && jQuery.support.cors) {
                         options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
                     }
                 });
-
                 $.ajax({
-                    url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=10 0&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
+                    url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=200&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
                     method: "GET",
                     crossDomain: true
 
                 }).then(function (res1) {
                     console.log(res1);
+                    // details(res1);
+                });
+            });
+        }
 
-                    for (var i = 0; i < res1.RECDATA.length; i++) {
-                        
-                        $("<article>").addClass("message")
-                            .attr("id","article"+i)
-                            .appendTo($("#articles"));
-                        
-                        $("<div>").addClass("message-header")
-                            .attr("id","siteName"+i)
-                            .appendTo($("#article"+i));
-                        
-                        $("<a>").text(res1.RECDATA[i].FacilityName)
-                            .attr("href",res1.RECDATA[i])
-                            .appendTo($("#siteName"+i));
+        function details(res) {
+            for (var i = 0; i < res.RECDATA.length; i++) {
+                if (res.RECDATA[i].FacilityTypeDescription === "Campground") {
 
+                    console.log(i+" index is campground");
 
+                    $("<article>").addClass("message")
+                        .attr("id", "article" + i)
+                        .appendTo($("#articles"));
+
+                    $("<div>").addClass("message-header")
+                        .attr("id", "siteName" + i)
+                        .appendTo($("#article" + i));
+
+                    $("<button>").addClass("button is-dark is-small")
+                        .text("")
+                        .attr("latVal", res.RECDATA[i].FacilityLatitude)
+                        .attr("lonVal", res.RECDATA[i].FacilityLongitude)
+                        .appendTo($("#siteName" + i));
+
+                    $("<p>").text(res.RECDATA[i].FacilityName)
+                        // .attr("href", res.RECDATA[i])
+                        .appendTo($("#siteName" + i));
+
+                    $("<button>").addClass("delete")
+                        .attr("aria-label", "delete")
+                        .appendTo($("#siteName" + i));
+
+                    $("<div>").addClass("message-body columns has-text-lefted")
+                        .attr("id", "body" + i)
+                        .appendTo($("#article" + i));
+
+                    $("<div>").addClass("column is-8")
+                        .attr("id", "info" + i)
+                        .appendTo($("#body" + i));
+
+                    $("<li>").html(res.RECDATA[i].FacilityDescription)
+                        .appendTo($("#info" + i));
+                    $("a").attr("target", "_blank");
+
+                    $("<li>").text(" Address : " + res.RECDATA[i].FACILITYADDRESS[0].City + ", " + res.RECDATA[i].FACILITYADDRESS[0].AddressStateCode + " " + res.RECDATA[i].FACILITYADDRESS[0].PostalCode)
+                        .appendTo($("#info" + i));
+
+                    var activity = [];
+                    for (var j = 0; j < res.RECDATA[i].ACTIVITY.length; j++) {
+                        activity.push(res.RECDATA[i].ACTIVITY[j].ActivityName);
                     }
 
-                });
+                    $("<li>").text(" Activity : " + activity)
+                        .appendTo($("#info" + i));
 
-            });
+                    $("<div>").addClass("column is-4")
+                        .text("Will be Updated Soon")
+                        .attr("id", "map" + i)
+                        .appendTo($("#body" + i));
+
+                    for (var i = 0; i < res.RECDATA[i].LINK.length; i++) {
+                        if (res.RECDATA[i].LINK[i].LinkType === "Official Web Site") {
+                            $("<li>").html(res.RECDATA[i].LINK[i].LinkType + " : <a target=\"" + "_blank" + "\" href=\"" + res.RECDATA[i].LINK[i].URL + "\">" + res.RECDATA[i].LINK[i].Title + "</a>")
+                                .appendTo($("#info" + i));
+                        }
+                    }
+                }
+            }
         }
 
     </script>
