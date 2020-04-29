@@ -9,7 +9,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    <link rel="stylesheet" href="style.css" />
+    <!-- <link rel="stylesheet" href="style.css" /> -->
     <title>Document</title>
 </head>
 
@@ -120,6 +120,12 @@
                 .appendTo($("#stateOptions"));
         }
 
+        var mycampsiteArray = JSON.parse(localStorage.getItem("userData"));
+        
+        if (mycampsiteArray==null){
+            var mycampsiteArray = [];
+        }
+
         $(document).ready(function () {
 
             $("#search").click(function () {
@@ -132,7 +138,29 @@
                     campsiteInfoByCity(cityInput);
                 } else {
                     console.log(stateInput);
+                    campsiteInfoByState(stateInput);
                 }
+            });
+
+            $("#articles").on("click", ".delete", function () {
+                var close = $(this).attr("value");
+                $("#" + close + "").empty();
+            });
+
+            $("#mycampsite").click(function(){
+                for(var i = 0; i < mycampsiteArray.length; i++){
+                    console.log(mycampsiteArray);
+                    campsiteInfoByID(mycampsiteArray[i]);
+                }
+            });
+
+            $("#articles").on("click", "#save", function () {
+                var siteID = $(this).attr("siteID");
+                mycampsiteArray.unshift(siteID);
+                mycampsiteArray = Array.from(new Set(mycampsiteArray));
+                localStorage.setItem("userData",JSON.stringify(mycampsiteArray));     
+                
+                console.log(siteID);
             });
         });
 
@@ -145,21 +173,112 @@
             }).then(function (res0) {
                 var lon = res0.coord.lon;
                 var lat = res0.coord.lat;
+                campsiteInfoByCoords(lat,lon);
+            });
+        }
 
-                jQuery.ajaxPrefilter(function (options) {
-                    if (options.crossDomain && jQuery.support.cors) {
-                        options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+        function campsiteInfoByCoords(lat, lon) {
+            jQuery.ajaxPrefilter(function (options) {
+                if (options.crossDomain && jQuery.support.cors) {
+                    options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+                }
+            });
+            $.ajax({
+                url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=200&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
+                method: "GET",
+                crossDomain: true
+
+            }).then(function (res) {
+                details(res);
+            });
+        }
+
+        function campsiteInfoByID(campgroundID) {
+            jQuery.ajaxPrefilter(function (options) {
+                if (options.crossDomain && jQuery.support.cors) {
+                    options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+                }
+            });
+            $.ajax({
+                url: "https://ridb.recreation.gov/api/v1/facilities/" + campgroundID + "?full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
+                method: "GET",
+                crossDomain: true
+            }).then(function (res) {
+                console.log(res);
+                
+                $("<article>").addClass("message")
+                        .attr("id", "article" + i)
+                        .appendTo($("#articles"));
+
+                    $("<div>").addClass("message-header")
+                        .attr("id", "siteName" + i)
+                        .appendTo($("#article" + i));
+
+                    $("<button>").addClass("button is-dark is-small")
+                        .text("")
+                        .attr("siteID", res.FacilityID)
+                        .attr("id", "save")
+                        .appendTo($("#siteName" + i));
+
+                    $("<p>").text(res.FacilityName)
+                        .appendTo($("#siteName" + i));
+
+                    $("<button>").addClass("delete")
+                        .attr("aria-label", "delete")
+                        .attr("value", "article" + i)
+                        .appendTo($("#siteName" + i));
+
+                    $("<div>").addClass("message-body columns has-text-lefted")
+                        .attr("id", "body" + i)
+                        .appendTo($("#article" + i));
+
+                    $("<div>").addClass("column is-8")
+                        .attr("id", "info" + i)
+                        .appendTo($("#body" + i));
+
+                    $("<p>").html(res.FacilityDescription)
+                        .appendTo($("#info" + i));
+                    $("a").attr("target", "_blank");
+
+                    $("<li>").text(" Address : " + res.FACILITYADDRESS[0].City + ", " + res.FACILITYADDRESS[0].AddressStateCode + " " + res.FACILITYADDRESS[0].PostalCode)
+                        .appendTo($("#info" + i));
+
+                    var activity = [];
+                    for (var j = 0; j < res.ACTIVITY.length; j++) {
+                        activity.push(res.ACTIVITY[j].ActivityName);
                     }
-                });
-                $.ajax({
-                    url: "https://ridb.recreation.gov/api/v1/facilities?latitude=" + lat + "&longitude=" + lon + "&radius=200&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
-                    method: "GET",
-                    crossDomain: true
+                    if (activity=0){
+                    $("<li>").text(" Activity : " + activity)
+                        .appendTo($("#info" + i));
+                    }
 
-                }).then(function (res1) {
-                    console.log(res1);
-                    // details(res1);
-                });
+                    $("<div>").addClass("column is-4")
+                        .text("Will be Updated Soon")
+                        .attr("id", "map" + i)
+                        .appendTo($("#body" + i));
+
+                    for (var x = 0; x < res.LINK.length; x++) {
+                        if (res.LINK[x].LinkType === "Official Web Site") {
+                            $("<li>").html(res.LINK[x].LinkType + " : <a target=\"" + "_blank" + "\" href=\"" + res.LINK[x].URL + "\">" + res.LINK[x].Title + "</a>")
+                                .appendTo($("#info" + i));
+                        }
+                    }
+
+            });
+        }
+
+        function campsiteInfoByState(stateInput) {
+            jQuery.ajaxPrefilter(function (options) {
+                if (options.crossDomain && jQuery.support.cors) {
+                    options.url = 'https://cors-anywhere.herokuapp.com/' + options.url;
+                }
+            });
+            $.ajax({
+                url: "https://ridb.recreation.gov/api/v1/facilities?state=" + stateInput + "&full=true&apikey=dd9db9b8-cd8a-43be-906b-60b309490362",
+                method: "GET",
+                crossDomain: true
+            }).then(function (res) {
+                details(res);
             });
         }
 
@@ -167,7 +286,7 @@
             for (var i = 0; i < res.RECDATA.length; i++) {
                 if (res.RECDATA[i].FacilityTypeDescription === "Campground") {
 
-                    console.log(i+" index is campground");
+                    // console.log(i + " index is campground");
 
                     $("<article>").addClass("message")
                         .attr("id", "article" + i)
@@ -179,8 +298,8 @@
 
                     $("<button>").addClass("button is-dark is-small")
                         .text("")
-                        .attr("latVal", res.RECDATA[i].FacilityLatitude)
-                        .attr("lonVal", res.RECDATA[i].FacilityLongitude)
+                        .attr("siteID", res.RECDATA[i].FacilityID)
+                        .attr("id", "save")
                         .appendTo($("#siteName" + i));
 
                     $("<p>").text(res.RECDATA[i].FacilityName)
@@ -189,6 +308,7 @@
 
                     $("<button>").addClass("delete")
                         .attr("aria-label", "delete")
+                        .attr("value", "article" + i)
                         .appendTo($("#siteName" + i));
 
                     $("<div>").addClass("message-body columns has-text-lefted")
@@ -199,7 +319,7 @@
                         .attr("id", "info" + i)
                         .appendTo($("#body" + i));
 
-                    $("<li>").html(res.RECDATA[i].FacilityDescription)
+                    $("<p>").html(res.RECDATA[i].FacilityDescription)
                         .appendTo($("#info" + i));
                     $("a").attr("target", "_blank");
 
@@ -210,18 +330,19 @@
                     for (var j = 0; j < res.RECDATA[i].ACTIVITY.length; j++) {
                         activity.push(res.RECDATA[i].ACTIVITY[j].ActivityName);
                     }
-
+                    if (activity=0){
                     $("<li>").text(" Activity : " + activity)
                         .appendTo($("#info" + i));
+                    }
 
                     $("<div>").addClass("column is-4")
                         .text("Will be Updated Soon")
                         .attr("id", "map" + i)
                         .appendTo($("#body" + i));
 
-                    for (var i = 0; i < res.RECDATA[i].LINK.length; i++) {
-                        if (res.RECDATA[i].LINK[i].LinkType === "Official Web Site") {
-                            $("<li>").html(res.RECDATA[i].LINK[i].LinkType + " : <a target=\"" + "_blank" + "\" href=\"" + res.RECDATA[i].LINK[i].URL + "\">" + res.RECDATA[i].LINK[i].Title + "</a>")
+                    for (var x = 0; x < res.RECDATA[i].LINK.length; x++) {
+                        if (res.RECDATA[i].LINK[x].LinkType === "Official Web Site") {
+                            $("<li>").html(res.RECDATA[i].LINK[x].LinkType + " : <a target=\"" + "_blank" + "\" href=\"" + res.RECDATA[i].LINK[x].URL + "\">" + res.RECDATA[i].LINK[x].Title + "</a>")
                                 .appendTo($("#info" + i));
                         }
                     }
